@@ -1,0 +1,16 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "cd-mcp-fetch",
+    "main": "src/index.ts",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "compatibility_date": "2025-03-13",
+    "observability": {
+        "enabled": true
+    }
+}

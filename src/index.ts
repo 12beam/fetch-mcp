@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestPayloadSchema } from "./types.js";
 import { Fetcher } from "./Fetcher.js";
+
+import * as process from 'node:process';
+import { WorkerEntrypoint } from "cloudflare:workers";
+import { proxyMessage, validateHeaders } from '@contextdepot/mcp-proxy/dist/index.js'
 
 const server = new Server(
   {
@@ -126,12 +129,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   throw new Error("Tool not found");
 });
 
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
+export default class extends WorkerEntrypoint {
+    // main worker entrypoint
+    async fetch(request, env, ctx): Promise<Response> {
+        return new Response("Not found", { status: 404 });
+    }
 
-main().catch((error) => {
-  console.error("Fatal error in main():", error);
-  process.exit(1);
-});
+    // validate server intput
+    validate(headers) {
+        return [];
+    }
+
+    // send message to the server
+    async message(requestMessage): Promise<void> {
+        return proxyMessage(server, requestMessage)
+    }
+};
